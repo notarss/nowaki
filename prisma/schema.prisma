@@ -1,0 +1,113 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum UserRole {
+  USER
+  MERCHANT
+}
+
+enum FoodStatus {
+  AVAILABLE
+  SOLD_OUT
+  EXPIRED
+  INACTIVE
+}
+
+model User {
+  id String @id @default(cuid())
+
+  name  String
+  email String @unique
+
+  role UserRole @default(USER)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  merchantProfile MerchantProfile?
+}
+
+model MerchantProfile {
+  id String @id @default(cuid())
+
+  userId String @unique
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  storeName String
+
+  description String?
+
+  address String
+
+  latitude  Float?
+  longitude Float?
+
+  pickupInformation String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  foodListings FoodListing[]
+}
+
+model FoodCategory {
+  id String @id @default(cuid())
+
+  name String @unique
+
+  foods FoodListing[]
+}
+
+model FoodListing {
+  id String @id @default(cuid())
+
+  merchantId String
+
+  merchant MerchantProfile @relation(fields: [merchantId], references: [id])
+
+  categoryId String
+
+  category FoodCategory @relation(fields: [categoryId], references: [id])
+
+  title String
+
+  description String?
+
+  originalPrice Decimal @db.Decimal(10, 2)
+
+  surplusPrice Decimal @db.Decimal(10, 2)
+
+  stock Int
+
+  pickupDeadline DateTime
+
+  status FoodStatus @default(AVAILABLE)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  images FoodImage[]
+}
+
+model FoodImage {
+  id String @id @default(cuid())
+
+  foodListingId String
+
+  foodListing FoodListing @relation(fields: [foodListingId], references: [id])
+
+  imageUrl String
+}
