@@ -28,8 +28,12 @@ enum FoodStatus {
 model User {
   id String @id @default(cuid())
 
-  name  String
+  name String
   email String @unique
+
+  emailVerified Boolean @default(false)
+
+  image String?
 
   role UserRole @default(USER)
 
@@ -100,6 +104,8 @@ model FoodListing {
   updatedAt DateTime @updatedAt
 
   images FoodImage[]
+
+  isFeatured Boolean @default(false)
 }
 
 model FoodImage {
@@ -110,4 +116,6 @@ model FoodImage {
   foodListing FoodListing @relation(fields: [foodListingId], references: [id])
 
   imageUrl String
+
+  createdAt DateTime @default(now())
 }
